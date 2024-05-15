@@ -1,6 +1,7 @@
 <?php
 
 use Atendwa\Honeypot\Exceptions\SpamDetected;
+use Atendwa\Honeypot\Honeypot;
 use Atendwa\Honeypot\Http\Middleware\PreventSpam;
 use Illuminate\Http\Request;
 
@@ -71,7 +72,9 @@ it('throws a SpamDetected exception when submitted too fast', function (): void 
     });
 });
 
-it('does not throw a SpamDetected exception when submitted within allowed time', function (): void {
+it(/**
+ * @throws Throwable
+ */ 'does not throw a SpamDetected exception when submitted within allowed time', function (): void {
     config(['honeypot.enabled' => true]);
 
     $closureCalled = false;
@@ -100,4 +103,35 @@ it('does not throw a SpamDetected exception when submitted within allowed time',
     });
 
     $this->assertTrue($closureCalled, 'Next was called');
+});
+
+it('throws a SpamDetected exception when submitted too fast and passes fields', function (): void {
+    $this->expectException(SpamDetected::class);
+
+    $honeypot = new Honeypot();
+    $honeypot->detectSpam('random input', microtime(true));
+});
+
+it('does not throw a SpamDetected exception when submitted within allowed time and passes fields', function (): void {
+    $sleepDuration = (int) config('honeypot.minimum_submission_duration');
+
+    $start = microtime(true);
+
+    sleep($sleepDuration);
+
+    $sleepDuration = (int) config('honeypot.minimum_submission_duration');
+
+    sleep($sleepDuration);
+
+    $honeypot = new Honeypot();
+
+    try {
+        $honeypot->detectSpam('', $start);
+
+        $detected = false;
+    } catch (Exception) {
+        $detected = true;
+    }
+
+    $this->assertTrue(!$detected, 'No exception should be thrown');
 });

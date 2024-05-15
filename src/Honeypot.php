@@ -15,7 +15,7 @@ final class Honeypot
      */
     private array $config;
 
-    private Request $request;
+    private ?Request $request = null;
 
     private string $honeypotInput;
 
@@ -56,19 +56,15 @@ final class Honeypot
             return;
         }
 
-        $this->checkRequiredFields();
+        if ($this->request) {
+            $this->checkRequiredFields();
+        }
 
-        $input = match ($honeyPotInput) {
-            null => $this->request->input($this->honeypotInput),
-            default => $honeyPotInput,
-        };
+        $input = $honeyPotInput ?? $this->request->input($this->honeypotInput);
 
         $this->checkIfHoneypotWasFilled($input);
 
-        $startTime = match ($honeyPotInput) {
-            null => $this->request->input($this->timeInput),
-            default => $timeInput,
-        };
+        $startTime = $timeInput ?? $this->request->input($this->timeInput);
 
         $this->checkSubmissionDuration($startTime);
     }
@@ -100,9 +96,9 @@ final class Honeypot
      *
      * @throws Throwable
      */
-    private function checkIfHoneypotWasFilled(string $input): void
+    private function checkIfHoneypotWasFilled(?string $input): void
     {
-        $this->handleSpam(mb_strlen($input) > 0);
+        $this->handleSpam(mb_strlen($input ?? '') > 0);
     }
 
     /**
