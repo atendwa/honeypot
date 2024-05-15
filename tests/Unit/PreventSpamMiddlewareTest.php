@@ -133,5 +133,5 @@ it('does not throw a SpamDetected exception when submitted within allowed time a
         $detected = true;
     }
 
-    $this->assertTrue(!$detected, 'No exception should be thrown');
+    $this->assertTrue( ! $detected, 'No exception should be thrown');
 });
