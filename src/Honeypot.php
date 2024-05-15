@@ -48,17 +48,29 @@ final class Honeypot
      *
      * @throws Throwable
      */
-    public function detectSpam(): void
-    {
+    public function detectSpam(
+        ?string $honeyPotInput = null,
+        ?float $timeInput = null
+    ): void {
         if ( ! $this->isHoneypotEnabled()) {
             return;
         }
 
         $this->checkRequiredFields();
 
-        $this->checkIfHoneypotWasFilled();
+        $input = match ($honeyPotInput) {
+            null => $this->request->input($this->honeypotInput),
+            default => $honeyPotInput,
+        };
 
-        $this->checkSubmissionDuration();
+        $this->checkIfHoneypotWasFilled($input);
+
+        $startTime = match ($honeyPotInput) {
+            null => $this->request->input($this->timeInput),
+            default => $timeInput,
+        };
+
+        $this->checkSubmissionDuration($startTime);
     }
 
     /**
@@ -88,10 +100,8 @@ final class Honeypot
      *
      * @throws Throwable
      */
-    private function checkIfHoneypotWasFilled(): void
+    private function checkIfHoneypotWasFilled(string $input): void
     {
-        $input = $this->request->input($this->honeypotInput) ?? '';
-
         $this->handleSpam(mb_strlen($input) > 0);
     }
 
@@ -100,13 +110,13 @@ final class Honeypot
      *
      * @throws Throwable
      */
-    private function checkSubmissionDuration(): void
+    private function checkSubmissionDuration(float $startTime): void
     {
-        $startTime = $this->request->input($this->timeInput);
-
         $requestDuration = microtime(true) - $startTime;
 
-        $this->handleSpam($requestDuration <= $this->minimumSubmissionDuration);
+        $minDuration = $this->minimumSubmissionDuration;
+
+        $this->handleSpam($requestDuration <= $minDuration);
     }
 
     /**

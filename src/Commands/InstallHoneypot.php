@@ -6,7 +6,6 @@ namespace Atendwa\Honeypot\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 
@@ -22,7 +21,7 @@ final class InstallHoneypot extends Command
 
         $configExists = $this->configExists();
 
-        if ( ! $configExists) {
+        if (! $configExists) {
             $this->publishConfiguration();
 
             info('Published configuration.');

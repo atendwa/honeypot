@@ -1,14 +1,16 @@
 <fieldset class="hidden">
     <input
-        name="{{ config('honeypot.honeypot_input_name') }}"
-        type="text"
+        wire.model="happy_birthday"
+        name="happy_birthday"
         maxlength="255"
+        type="text"
         hidden
     >
 
     <input
-        name="{{ config('honeypot.honeypot_time_input_name') }}"
+        wire.model="happy_birthday_time"
         value="{{ microtime(true) }}"
+        name="happy_birthday_time"
         maxlength="255"
         type="text"
         required
