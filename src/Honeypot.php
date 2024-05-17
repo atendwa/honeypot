@@ -64,7 +64,7 @@ final class Honeypot
 
         $this->checkIfHoneypotWasFilled($input);
 
-        $startTime = $timeInput ?? $this->request->input($this->timeInput);
+        $startTime = $timeInput ?? $this->request->float($this->timeInput);
 
         $this->checkSubmissionDuration($startTime);
     }
